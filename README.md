@@ -56,44 +56,6 @@ RAG 项目一般分两条链路：
 | 数据注入链路 | 把文档处理后写入向量库 | 添加或更新知识库时 |
 | 问答查询链路 | 根据用户问题检索并回答 | 用户提问时         |
 
-### 4.1 数据注入流程图
-
-```mermaid
-sequenceDiagram
-    participant File as 文档文件
-    participant Ingest as Go注入程序
-    participant Split as 文本切分器
-    participant Ollama as Ollama Embedding
-    participant Milvus as Milvus
-
-    File->>Ingest: 读取Markdown/PDF
-    Ingest->>Split: 按chunk size和overlap切分
-    Split-->>Ingest: 返回多个chunk
-    Ingest->>Ollama: 为每个chunk生成embedding
-    Ollama-->>Ingest: 返回向量
-    Ingest->>Milvus: 写入id/text/vector
-    Milvus-->>Ingest: 返回写入结果
-```
-
-### 4.2 问答查询流程图
-
-```mermaid
-sequenceDiagram
-    participant User as 用户
-    participant API as RAG后端
-    participant Ollama as Ollama
-    participant Milvus as Milvus
-    participant LLM as 大模型
-
-    User->>API: 提交问题
-    API->>Ollama: 对问题生成embedding
-    Ollama-->>API: 返回问题向量
-    API->>Milvus: Search TopK相似chunk
-    Milvus-->>API: 返回相关文本片段
-    API->>LLM: 问题 + 检索片段组成Prompt
-    LLM-->>API: 生成回答
-    API-->>User: 返回答案和参考来源
-```
 
 ## 5. 每个组件干什么
 
